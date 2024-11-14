@@ -1,54 +1,38 @@
 _base_ = ["../_base_/default_runtime.py"]
 
 # misc custom setting
-batch_size = 32 # bs: total bs in all gpus
+batch_size = 16  # bs: total bs in all gpus
 mix_prob = 0.8
 empty_cache = False
 enable_amp = True
+sync_bn = True
+num_worker_per_gpu=8
+num_worker = 64
 
 # model settings
 model = dict(
     type="DefaultSegmentor",
     backbone=dict(
-        type="SpUNet-v1m1",
+        type="OACNNs",
         in_channels=4,
-        num_classes=19,
-        channels=(32, 64, 128, 256, 256, 128, 96, 96),
-        layers=(2, 3, 4, 6, 2, 2, 2, 2),
+        num_classes=3,
+        embed_channels=64,
+        enc_channels=[64, 64, 128, 256],
+        groups=[4, 4, 8, 16],
+        enc_depth=[3, 3, 9, 8],
+        dec_channels=[256, 256, 256, 256],
+        point_grid_size=[[8, 12, 16, 16], [6, 9, 12, 12], [4, 6, 8, 8], [3, 4, 6, 6]],
+        dec_depth=[2, 2, 2, 2],
+        enc_num_ref=[16, 16, 16, 16],
     ),
-    criteria=[
-        dict(
-            type="CrossEntropyLoss",
-            weight=[
-                3.1557,
-                8.7029,
-                7.8281,
-                6.1354,
-                6.3161,
-                7.9937,
-                8.9704,
-                10.1922,
-                1.6155,
-                4.2187,
-                1.9385,
-                5.5455,
-                2.0198,
-                2.6261,
-                1.3212,
-                5.1102,
-                2.5492,
-                5.8585,
-                7.3929,
-            ],
-            loss_weight=1.0,
-            ignore_index=-1,
-        )
-    ],
+    criteria=[dict(type="CrossEntropyLoss", weight =[1.087, 16.49, 52.56],loss_weight=1.0, ignore_index=-1)],
 )
 
+
+
 # scheduler settings
-epoch = 10
-eval_epoch = 10
+epoch = 1
+eval_epoch = 1
 optimizer = dict(type="AdamW", lr=0.002, weight_decay=0.005)
 scheduler = dict(
     type="OneCycleLR",
@@ -60,33 +44,17 @@ scheduler = dict(
 )
 
 # dataset settings
-dataset_type = "SemanticKITTIDataset"
-data_root = "/ceph/home/student.aau.dk/bd45mb/pointtransformerv3/semantic_kitti"
+dataset_type = "TractorsNCombinesDataset"
+data_root = "/ceph/home/student.aau.dk/bd45mb/pointtransformerv3/datasets/tractors_and_combines_synth/"
 ignore_index = -1
 names = [
-    "car",
-    "bicycle",
-    "motorcycle",
-    "truck",
-    "other-vehicle",
-    "person",
-    "bicyclist",
-    "motorcyclist",
-    "road",
-    "parking",
-    "sidewalk",
-    "other-ground",
-    "building",
-    "fence",
-    "vegetation",
-    "trunk",
-    "terrain",
-    "pole",
-    "traffic-sign",
+    "other",
+    "tractor",
+    "combine",
 ]
 
 data = dict(
-    num_classes=19,
+    num_classes=3,
     ignore_index=ignore_index,
     names=names,
     train=dict(
@@ -99,7 +67,6 @@ data = dict(
             dict(type="RandomRotate", angle=[-1, 1], axis="z", center=[0, 0, 0], p=0.5),
             # dict(type="RandomRotate", angle=[-1/6, 1/6], axis="x", p=0.5),
             # dict(type="RandomRotate", angle=[-1/6, 1/6], axis="y", p=0.5),
-            dict(type="PointClip", point_cloud_range=(-35.2, -35.2, -4, 35.2, 35.2, 2)),
             dict(type="RandomScale", scale=[0.9, 1.1]),
             # dict(type="RandomShift", shift=[0.2, 0.2, 0.2]),
             dict(type="RandomFlip", p=0.5),
@@ -113,7 +80,9 @@ data = dict(
                 keys=("coord", "strength", "segment"),
                 return_grid_coord=True,
             ),
-            # dict(type="SphereCrop", point_max=1000000, mode="random"),
+            dict(type="PointClip", point_cloud_range=(-35.2, -35.2, -4, 35.2, 35.2, 2)),
+            dict(type="SphereCrop", sample_rate=0.8, mode="random"),
+            dict(type="SphereCrop", point_max=120000, mode="random"),
             # dict(type="CenterShift", apply_z=False),
             dict(type="ToTensor"),
             dict(
@@ -130,7 +99,6 @@ data = dict(
         split="val",
         data_root=data_root,
         transform=[
-            dict(type="PointClip", point_cloud_range=(-35.2, -35.2, -4, 35.2, 35.2, 2)),
             dict(
                 type="GridSample",
                 grid_size=0.05,
@@ -139,6 +107,7 @@ data = dict(
                 keys=("coord", "strength", "segment"),
                 return_grid_coord=True,
             ),
+            dict(type="PointClip", point_cloud_range=(-35.2, -35.2, -4, 35.2, 35.2, 2)),
             dict(type="ToTensor"),
             dict(
                 type="Collect",
@@ -153,9 +122,7 @@ data = dict(
         type=dataset_type,
         split="val",
         data_root=data_root,
-        transform=[
-            dict(type="PointClip", point_cloud_range=(-35.2, -35.2, -4, 35.2, 35.2, 2)),
-        ],
+        transform=[],
         test_mode=True,
         test_cfg=dict(
             voxelize=dict(
@@ -168,6 +135,10 @@ data = dict(
             ),
             crop=None,
             post_transform=[
+                dict(
+                    type="PointClip",
+                    point_cloud_range=(-35.2, -35.2, -4, 35.2, 35.2, 2),
+                ),
                 dict(type="ToTensor"),
                 dict(
                     type="Collect",

@@ -61,7 +61,7 @@ scheduler = dict(
 
 # dataset settings
 dataset_type = "SemanticKITTIDataset"
-data_root = "data/semantic_kitti"
+data_root = "/ceph/home/student.aau.dk/bd45mb/pointtransformerv3/semantic_kitti"
 ignore_index = -1
 names = [
     "car",
