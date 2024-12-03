@@ -1,9 +1,9 @@
 _base_ = ["../_base_/default_runtime.py"]
 
 # misc custom setting
-batch_size = 2  # bs: total bs in all gpus
+batch_size = 6  # bs: total bs in all gpus
 mix_prob = 0.8
-empty_cache = False
+empty_cache = True
 enable_amp = True
 sync_bn = True
 num_worker_per_gpu=2
@@ -14,7 +14,7 @@ model = dict(
     type="DefaultSegmentor",
     backbone=dict(
         type="OACNNs",
-        in_channels=4,
+        in_channels=3,
         num_classes=3,
         embed_channels=64,
         enc_channels=[64, 64, 128, 256],
@@ -25,7 +25,7 @@ model = dict(
         dec_depth=[2, 2, 2, 2],
         enc_num_ref=[16, 16, 16, 16],
     ),
-    criteria=[dict(type="CrossEntropyLoss", weight =[1.087, 16.49, 52.56],loss_weight=1.0, ignore_index=-1)],
+    criteria=[dict(type="CrossEntropyLoss" ,loss_weight=1.0, ignore_index=-1)],
 )
 
 
@@ -77,7 +77,9 @@ data = dict(
                 grid_size=0.05,
                 hash_type="fnv",
                 mode="train",
-                keys=("coord", "strength", "segment"),
+                keys=("coord", 
+                      #"strength", 
+                      "segment"),
                 return_grid_coord=True,
             ),
             dict(type="PointClip", point_cloud_range=(-35.2, -35.2, -4, 35.2, 35.2, 2)),
@@ -88,7 +90,7 @@ data = dict(
             dict(
                 type="Collect",
                 keys=("coord", "grid_coord", "segment"),
-                feat_keys=("coord", "strength"),
+                feat_keys=("coord"),#, "strength"),
             ),
         ],
         test_mode=False,
@@ -104,7 +106,9 @@ data = dict(
                 grid_size=0.05,
                 hash_type="fnv",
                 mode="train",
-                keys=("coord", "strength", "segment"),
+                keys=("coord",
+                      #"strength", 
+                      "segment"),
                 return_grid_coord=True,
             ),
             dict(type="PointClip", point_cloud_range=(-35.2, -35.2, -4, 35.2, 35.2, 2)),
@@ -112,7 +116,7 @@ data = dict(
             dict(
                 type="Collect",
                 keys=("coord", "grid_coord", "segment"),
-                feat_keys=("coord", "strength"),
+                feat_keys=("coord"),#, "strength"),
             ),
         ],
         test_mode=False,
@@ -131,7 +135,7 @@ data = dict(
                 hash_type="fnv",
                 mode="test",
                 return_grid_coord=True,
-                keys=("coord", "strength"),
+                keys=("coord"),#, "strength"),
             ),
             crop=None,
             post_transform=[
@@ -143,7 +147,7 @@ data = dict(
                 dict(
                     type="Collect",
                     keys=("coord", "grid_coord", "index"),
-                    feat_keys=("coord", "strength"),
+                    feat_keys=("coord"),# "strength"),
                 ),
             ],
             aug_transform=[

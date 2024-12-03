@@ -71,7 +71,7 @@ class TractorsAndCombinesRealDataset(DefaultDataset):
 
         data_dict = dict(
             coord=coord,
-            strength=strength,
+            # strength=strength,
             segment=segment,
             name=self.get_data_name(idx),
         )

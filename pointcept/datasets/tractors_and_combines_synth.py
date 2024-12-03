@@ -22,9 +22,9 @@ class TractorsAndCombinesSynthDataset(DefaultDataset):
 
     def get_data_list(self):
         split2seq = dict(
-            train=[0,3],
-            val=[1],
-            test=[2],
+            train=[2,3],
+            val=[4],
+            test=[5],
         )
         if isinstance(self.split, str):
             seq_list = split2seq[self.split]
@@ -68,7 +68,7 @@ class TractorsAndCombinesSynthDataset(DefaultDataset):
 
         data_dict = dict(
             coord=coord,
-            strength=strength,
+            # strength=strength,
             segment=segment,
             name=self.get_data_name(idx),
         )
@@ -99,6 +99,5 @@ class TractorsAndCombinesSynthDataset(DefaultDataset):
             0: 0,  # "unlabeled"
             1: 1, # "tractor"
             2: 2, # "combine"
-           -1: 0,
         }
         return learning_map_inv
