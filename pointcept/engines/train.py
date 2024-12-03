@@ -178,7 +178,7 @@ class Trainer(TrainerBase):
         for key in input_dict.keys():
             if isinstance(input_dict[key], torch.Tensor):
                 input_dict[key] = input_dict[key].cuda(non_blocking=True)
-        with torch.cuda.amp.autocast(enabled=self.cfg.enable_amp):
+        with torch.amp.autocast('cuda', enabled=self.cfg.enable_amp):
             output_dict = self.model(input_dict)
             self.logger.info(f"output_dict {output_dict}")
             loss = output_dict["loss"]
