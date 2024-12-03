@@ -1,7 +1,7 @@
 """
-tractors and combines dataset
+tractors and combines real dataset
 
-Author: Xiaoyang Wu (xiaoyang.wu.cs@gmail.com)
+Author: Xiaoyang Wu (xiaoyang.wu.cs@gmail.com) (edited)
 Please cite our work if the code is helpful to you.
 """
 
@@ -13,7 +13,7 @@ from .defaults import DefaultDataset
 
 
 @DATASETS.register_module()
-class TractorsNCombinesDataset(DefaultDataset):
+class TractorsAndCombinesRealDataset(DefaultDataset):
     def __init__(self, ignore_index=-1, **kwargs):
         self.ignore_index = ignore_index
         self.learning_map = self.get_learning_map(ignore_index)
@@ -22,8 +22,8 @@ class TractorsNCombinesDataset(DefaultDataset):
 
     def get_data_list(self):
         split2seq = dict(
-            train=[0],
-            val=[1],
+            train=[0,1],
+            val=[3],
             test=[2],
         )
         if isinstance(self.split, str):
@@ -36,9 +36,12 @@ class TractorsNCombinesDataset(DefaultDataset):
             raise NotImplementedError
 
         data_list = []
+        all_seq_dirs = sorted(os.listdir(os.path.join(self.data_root, "dataset", "Sequences")))
+        
         for seq in seq_list:
-            seq = str(seq).zfill(2)
-            seq_folder = os.path.join(self.data_root, "dataset", "sequences", seq)
+            # seq = str(seq).zfill(2)
+            seq = all_seq_dirs[seq]
+            seq_folder = os.path.join(self.data_root, "dataset", "Sequences", seq)
             seq_files = sorted(os.listdir(os.path.join(seq_folder, "points")))
             data_list += [
                 os.path.join(seq_folder, "points", file) for file in seq_files
@@ -50,15 +53,15 @@ class TractorsNCombinesDataset(DefaultDataset):
         with open(data_path, "rb") as b:
             scan = np.load(b).astype(np.float32)
         coord = scan[:, :3]
-        strength = scan[:, -1].reshape([-1, 1])
+        strength = np.zeros_like(scan[:, -1]).reshape([-1, 1])
 
         label_file = data_path.replace("points", "labels")
         if os.path.exists(label_file):
             with open(label_file, "rb") as a:
-                segment = np.round(np.load(a)).astype(np.uint32).reshape(-1).astype(np.int32)
-                # segment = np.vectorize(self.learning_map.__getitem__)(
-                #     segment & 0xFFFF
-                # ).astype(np.int32)
+                segment = np.round(np.load(a)).astype(np.uint32)#.reshape(-1).astype(np.int32)
+                segment = np.vectorize(self.learning_map.__getitem__)(
+                    segment & 0xFFFF
+                ).astype(np.int32)
         else:
             raise Exception("no labels found") 
             segment = np.zeros(scan.shape[0]).astype(np.int32)
@@ -89,6 +92,7 @@ class TractorsNCombinesDataset(DefaultDataset):
             0: 0,  # "unlabeled"
             1: 1, # "tractor"
             2: 2, # "combine"
+            3: 0, # "trailer"
         }
         return learning_map
 
@@ -99,5 +103,7 @@ class TractorsNCombinesDataset(DefaultDataset):
             0: 0,  # "unlabeled"
             1: 1, # "tractor"
             2: 2, # "combine"
+            -1: 0,
+
         }
         return learning_map_inv

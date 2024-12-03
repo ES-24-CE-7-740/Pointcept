@@ -1,13 +1,13 @@
 _base_ = ["../_base_/default_runtime.py"]
 
 # misc custom setting
-batch_size = 16  # bs: total bs in all gpus
+batch_size = 2  # bs: total bs in all gpus
 mix_prob = 0.8
 empty_cache = False
 enable_amp = True
 sync_bn = True
-num_worker_per_gpu=8
-num_worker = 64
+num_worker_per_gpu=2
+num_worker = 12
 
 # model settings
 model = dict(
@@ -44,8 +44,8 @@ scheduler = dict(
 )
 
 # dataset settings
-dataset_type = "TractorsNCombinesDataset"
-data_root = "/ceph/home/student.aau.dk/bd45mb/pointtransformerv3/datasets/tractors_and_combines_synth/"
+dataset_type = "TractorsAndCombinesSynthDataset"
+data_root = "/workspace/tractors_and_combines_synth/"
 ignore_index = -1
 names = [
     "other",

@@ -1,50 +1,34 @@
 _base_ = ["../_base_/default_runtime.py"]
 
 # misc custom setting
-batch_size = 2  # bs: total bs in all gpus
+batch_size = 12  # bs: total bs in all gpus
 mix_prob = 0.8
 empty_cache = False
 enable_amp = True
+sync_bn = True
+num_worker_per_gpu=2
+num_worker = 12
 
 # model settings
 model = dict(
     type="DefaultSegmentor",
     backbone=dict(
-        type="PT-v2m2",
+        type="OACNNs",
         in_channels=4,
-        num_classes=19,
-        patch_embed_depth=1,
-        patch_embed_channels=48,
-        patch_embed_groups=6,
-        patch_embed_neighbours=8,
-        enc_depths=(2, 2, 6, 2),
-        enc_channels=(96, 192, 384, 512),
-        enc_groups=(12, 24, 48, 64),
-        enc_neighbours=(16, 16, 16, 16),
-        dec_depths=(1, 1, 1, 1),
-        dec_channels=(48, 96, 192, 384),
-        dec_groups=(6, 12, 24, 48),
-        dec_neighbours=(16, 16, 16, 16),
-        grid_sizes=(0.15, 0.375, 0.9375, 2.34375),  # x3, x2.5, x2.5, x2.5
-        attn_qkv_bias=True,
-        pe_multiplier=False,
-        pe_bias=True,
-        attn_drop_rate=0.0,
-        drop_path_rate=0.3,
-        enable_checkpoint=False,
-        unpool_backend="map",  # map / interp
+        num_classes=3,
+        embed_channels=64,
+        enc_channels=[64, 64, 128, 256],
+        groups=[4, 4, 8, 16],
+        enc_depth=[3, 3, 9, 8],
+        dec_channels=[256, 256, 256, 256],
+        point_grid_size=[[8, 12, 16, 16], [6, 9, 12, 12], [4, 6, 8, 8], [3, 4, 6, 6]],
+        dec_depth=[2, 2, 2, 2],
+        enc_num_ref=[16, 16, 16, 16],
     ),
-    # fmt: off
-    criteria=[
-        dict(type="CrossEntropyLoss",
-             weight=[3.1557, 8.7029, 7.8281, 6.1354, 6.3161, 7.9937, 8.9704, 10.1922, 1.6155, 4.2187,
-                     1.9385, 5.5455, 2.0198, 2.6261, 1.3212, 5.1102, 2.5492, 5.8585, 7.3929],
-             loss_weight=1.0,
-             ignore_index=-1),
-        dict(type="LovaszLoss", mode="multiclass", loss_weight=1.0, ignore_index=-1),
-    ],
-    # fmt: on
+    criteria=[dict(type="CrossEntropyLoss", weight =[1.087, 16.49, 52.56],loss_weight=1.0, ignore_index=-1)],
 )
+
+
 
 # scheduler settings
 epoch = 1
@@ -60,33 +44,17 @@ scheduler = dict(
 )
 
 # dataset settings
-dataset_type = "SemanticKITTIDataset"
-data_root = "/workspace/semantic_kitti"
+dataset_type = "TractorsAndCombinesRealDataset"
+data_root = "/workspace/tractors_and_combines_real/"
 ignore_index = -1
 names = [
-    "car",
-    "bicycle",
-    "motorcycle",
-    "truck",
-    "other-vehicle",
-    "person",
-    "bicyclist",
-    "motorcyclist",
-    "road",
-    "parking",
-    "sidewalk",
-    "other-ground",
-    "building",
-    "fence",
-    "vegetation",
-    "trunk",
-    "terrain",
-    "pole",
-    "traffic-sign",
-]
+    "other",
+    "tractor",
+    "combine",
+ ]
 
 data = dict(
-    num_classes=19,
+    num_classes=3,
     ignore_index=ignore_index,
     names=names,
     train=dict(
