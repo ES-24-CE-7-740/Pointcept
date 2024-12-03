@@ -1,8 +1,8 @@
 _base_ = ["../_base_/default_runtime.py"]
 
 # misc custom setting
-batch_size = 12  # bs: total bs in all gpus
-num_worker = 24
+batch_size = 4  # bs: total bs in all gpus
+num_worker = 4
 mix_prob = 0.8
 empty_cache = False
 enable_amp = True
@@ -10,11 +10,11 @@ enable_amp = True
 # model settings
 model = dict(
     type="DefaultSegmentorV2",
-    num_classes=200,
+    num_classes=19,
     backbone_out_channels=64,
     backbone=dict(
         type="PT-v3m1",
-        in_channels=6,
+        in_channels=4,
         order=["z", "z-trans", "hilbert", "hilbert-trans"],
         stride=(2, 2, 2, 2),
         enc_depths=(2, 2, 2, 6, 2),
