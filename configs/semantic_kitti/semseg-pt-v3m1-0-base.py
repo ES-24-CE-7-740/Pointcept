@@ -67,7 +67,7 @@ param_dicts = [dict(keyword="block", lr=0.0006)]
 
 # dataset settings
 dataset_type = "SemanticKITTIDataset"
-data_root = "/home/agco/datasets/semantic_kitti"
+data_root = "data/semantic_kitti"
 ignore_index = -1
 label_names = [
     "car",
