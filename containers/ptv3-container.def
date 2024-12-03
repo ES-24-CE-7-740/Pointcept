@@ -1,0 +1,72 @@
+Bootstrap: docker
+From: pytorch/pytorch:2.1.0-cuda11.8-cudnn8-devel
+
+%post
+    export DEBIAN_FRONTEND=noninteractive
+    export TORCH_CUDA_ARCH_LIST="8.9"
+    
+    export PATH=/usr/local/cuda/bin:$PATH
+    export CPATH=/usr/local/cuda/include:$CPATH
+    export LD_LIBRARY_PATH=/usr/local/cuda/lib64:$LD_LIBRARY_PATH
+    
+    # Update and install required dependencies
+    apt-get update && apt-get install -y \
+        git \
+        nano \
+        libglib2.0-0 \
+        libxext6 \
+        libsm6 \
+        libxrender1 \
+        && apt-get clean
+    
+    # Initialize Conda in PATH
+    export PATH=/opt/conda/bin:$PATH
+    
+    # Set Conda config (Always says yes to installs)
+    /opt/conda/bin/conda config --set always_yes yes --set changeps1 no
+
+    # Install pointcept
+    git clone https://github.com/Pointcept/Pointcept.git
+    cd Pointcept
+    
+    conda create -n pointcept python=3.8
+    . /opt/conda/etc/profile.d/conda.sh
+    conda activate pointcept
+    
+    conda install ninja
+    conda install pytorch==2.1.0 torchvision==0.16.0 torchaudio==2.1.0 pytorch-cuda=11.8 -c pytorch -c nvidia
+    conda install h5py pyyaml -c anaconda
+    conda install sharedarray tensorboard tensorboardx yapf addict einops scipy plyfile termcolor timm -c conda-forge
+    conda install pytorch-cluster pytorch-scatter pytorch-sparse -c pyg
+    pip install torch-geometric
+    
+    pip install spconv-cu118
+    
+    pip install ftfy regex tqdm
+    pip install git+https://github.com/openai/CLIP.git
+    
+    cd libs/pointops
+    TORCH_CUDA_ARCH_LIST="8.9" python setup.py install
+    cd ../..
+    
+    #pip install open3d
+    
+    # Install flash-attention
+    pip install packaging
+    MAX_JOBS=24 pip install flash-attn --no-build-isolation
+    
+    # Clean cache
+    conda clean -a -y
+    pip cache purge
+
+
+%environment
+    # Set Conda in PATH and activate environment automatically
+    export PATH=/opt/conda/bin:$PATH
+    . /opt/conda/etc/profile.d/conda.sh
+    conda activate pointcept
+
+%runscript
+    # Default command when running the container
+    exec python "$@"
+
