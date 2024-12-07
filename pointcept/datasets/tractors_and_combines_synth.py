@@ -23,7 +23,7 @@ class TractorsAndCombinesSynthDataset(DefaultDataset):
     def get_data_list(self):
         split2seq = dict(
             train=[2,3],
-            val=[4],
+            # val=[4],
             test=[5],
         )
         if isinstance(self.split, str):
@@ -50,13 +50,22 @@ class TractorsAndCombinesSynthDataset(DefaultDataset):
         with open(data_path, "rb") as b:
             scan = np.load(b).astype(np.float32)
         coord = scan[:, :3]
+        
+        if coord.shape[0] > 50000:
+            random_sampels = np.random.uniform(low=0.0, high=1.0, size=coord.shape[0])
+            threshold = 50000/coord.shape[0]
+            idx_samples = random_sampels < threshold
+            coord = coord[idx_samples]
+
         strength = scan[:, -1].reshape([-1, 1])
 
         label_file = data_path.replace("points", "labels")
         if os.path.exists(label_file):
             with open(label_file, "rb") as a:
                 segment = np.round(np.load(a)).astype(np.uint32).reshape(-1).astype(np.int32)
-                # segment = np.vectorize(self.learning_map.__getitem__)(
+                if segment.shape[0] > 50000:
+                    segment = segment[idx_samples]
+                                    # segment = np.vectorize(self.learning_map.__getitem__)(
                 #     segment & 0xFFFF
                 # ).astype(np.int32)
         else:

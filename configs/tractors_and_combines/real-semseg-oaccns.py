@@ -1,13 +1,16 @@
 _base_ = ["../_base_/default_runtime.py"]
 
 # misc custom setting
-batch_size = 12  # bs: total bs in all gpus
+batch_size = 14  # bs: total bs in all gpus
 mix_prob = 0.8
 empty_cache = True
 enable_amp = True
 sync_bn = True
 num_worker_per_gpu=2
 num_worker = 12
+
+weight = "/workspace/Pointcept/exp/tgc_real_oacnns_from_synth_pretrain2/model/model_best.pth"
+test_only = True
 
 # model settings
 model = dict(
@@ -31,8 +34,8 @@ model = dict(
 
 
 # scheduler settings
-epoch = 10
-eval_epoch = 10
+epoch = 50
+eval_epoch = 50
 optimizer = dict(type="AdamW", lr=0.002, weight_decay=0.005)
 scheduler = dict(
     type="OneCycleLR",
