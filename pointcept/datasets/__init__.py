@@ -16,6 +16,7 @@ from .nuscenes import NuScenesDataset
 from .waymo import WaymoDataset
 from .tractors_and_combines_synth import TractorsAndCombinesSynthDataset
 from .tractors_and_combines_real import TractorsAndCombinesRealDataset
+from .ttgch_real_wml import TTGCHRealDataset
 # object
 from .modelnet import ModelNetDataset
 from .shapenet_part import ShapeNetPartDataset
