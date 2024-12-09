@@ -31,8 +31,8 @@ model = dict(
 
 
 # scheduler settings
-epoch = 1
-eval_epoch = 1
+epoch = 5
+eval_epoch = 5
 optimizer = dict(type="AdamW", lr=0.002, weight_decay=0.005)
 scheduler = dict(
     type="OneCycleLR",
@@ -46,6 +46,8 @@ scheduler = dict(
 # dataset settings
 dataset_type = "TractorsAndCombinesSynthDataset"
 data_root = "/workspace/tractors_and_combines_synth/"
+data_root_val = "/workspace/tractors_and_combines_real/"
+data_type_val = "TractorsAndCombinesRealDataset"
 ignore_index = -1
 names = [
     "other",
@@ -97,9 +99,9 @@ data = dict(
         ignore_index=ignore_index,
     ),
     val=dict(
-        type=dataset_type,
-        split="val",
-        data_root=data_root,
+        type=data_type_val,
+        split="test",
+        data_root=data_root_val,
         transform=[
             dict(
                 type="GridSample",
@@ -124,7 +126,7 @@ data = dict(
     ),
     test=dict(
         type=dataset_type,
-        split="val",
+        split="test",
         data_root=data_root,
         transform=[],
         test_mode=True,

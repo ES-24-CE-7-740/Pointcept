@@ -1,33 +1,24 @@
-_base_ = ["../_base_/default_runtime.py"]
-
+_base_ = ["../../_base_/default_runtime.py"]
 # misc custom setting
-batch_size = 12  # bs: total bs in all gpus
+batch_size = 14  # bs: total bs in all gpus
 mix_prob = 0.8
 empty_cache = True
 enable_amp = True
 sync_bn = True
 num_worker_per_gpu=2
 num_worker = 12
-EPOCHS = 50
 
-# dataset settings
-dataset_type = "TractorsAndCombinesRealDataset"
-data_root = "data/tractors_and_combines_real/"
-ignore_index = -1
-names = [
-    "other",
-    "tractor",
-    "combine",
- ]
-
-
+# weight = "/workspace/Pointcept/exp/tgc_real_oacnns_from_synth_pretrain2/model/model_best.pth"
+test_only = True
+data_root = "/workspace/ttgch_real_wml/"
+n_classes = 12
 # model settings
 model = dict(
     type="DefaultSegmentor",
     backbone=dict(
         type="OACNNs",
         in_channels=3,
-        num_classes=3,
+        num_classes=n_classes,
         embed_channels=64,
         enc_channels=[64, 64, 128, 256],
         groups=[4, 4, 8, 16],
@@ -43,8 +34,8 @@ model = dict(
 
 
 # scheduler settings
-epoch = EPOCHS
-eval_epoch = EPOCHS
+epoch = 50
+eval_epoch = 50
 optimizer = dict(type="AdamW", lr=0.002, weight_decay=0.005)
 scheduler = dict(
     type="OneCycleLR",
@@ -55,10 +46,12 @@ scheduler = dict(
     final_div_factor=100.0,
 )
 
-
-
+# dataset settings
+dataset_type = "TTGCHRealDataset"
+ignore_index = -1
+names = ['ground', 'unkown_tractor', 'blue_valtra', 'grey_valtra', 'valtra_with_forks', 'deer_krammer', 'massey', 'unknown_combine_harvester', 'fendt_paralevel', 'ideal_10t', 'laverda', 'trailer']
 data = dict(
-    num_classes=3,
+    num_classes=n_classes,
     ignore_index=ignore_index,
     names=names,
     train=dict(
@@ -128,7 +121,7 @@ data = dict(
     ),
     test=dict(
         type=dataset_type,
-        split="test",
+        split="val",
         data_root=data_root,
         transform=[],
         test_mode=True,
