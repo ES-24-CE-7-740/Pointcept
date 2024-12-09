@@ -77,6 +77,9 @@ class ClsEvaluator(HookBase):
                 m_iou, m_acc, all_acc
             )
         )
+        
+        current_epoch = self.trainer.epoch + 1
+        
         for i in range(self.trainer.cfg.data.num_classes):
             self.trainer.logger.info(
                 "Class_{idx}-{name} Result: iou/accuracy {iou:.4f}/{accuracy:.4f}".format(
@@ -86,8 +89,9 @@ class ClsEvaluator(HookBase):
                     accuracy=acc_class[i],
                 )
             )
-            self.trainer.writer.add_scalar(f"val_class_iou/{self.trainer.cfg.data.names[i]}", iou_class[i], current_epoch)
-            self.trainer.writer.add_scalar(f"val_class_accuracy/{self.trainer.cfg.data.names[i]}", acc_class[i], current_epoch)
+            if self.trainer.writer is not None:
+                self.trainer.writer.add_scalar(f"val_class_iou/{self.trainer.cfg.data.names[i]}", iou_class[i], current_epoch)
+                self.trainer.writer.add_scalar(f"val_class_accuracy/{self.trainer.cfg.data.names[i]}", acc_class[i], current_epoch)
             
         current_epoch = self.trainer.epoch + 1
         if self.trainer.writer is not None:
@@ -179,6 +183,9 @@ class SemSegEvaluator(HookBase):
                 m_iou, m_acc, all_acc
             )
         )
+        
+        current_epoch = self.trainer.epoch + 1
+        
         for i in range(self.trainer.cfg.data.num_classes):
             self.trainer.logger.info(
                 "Class_{idx}-{name} Result: iou/accuracy {iou:.4f}/{accuracy:.4f}".format(
@@ -188,10 +195,11 @@ class SemSegEvaluator(HookBase):
                     accuracy=acc_class[i],
                 )
             )
-            self.trainer.writer.add_scalar(f"val_class_iou/{self.trainer.cfg.data.names[i]}", iou_class[i], current_epoch)
-            self.trainer.writer.add_scalar(f"val_class_accuracy/{self.trainer.cfg.data.names[i]}", acc_class[i], current_epoch)
+            if self.trainer.writer is not None:
+                self.trainer.writer.add_scalar(f"val_class_iou/{self.trainer.cfg.data.names[i]}", iou_class[i], current_epoch)
+                self.trainer.writer.add_scalar(f"val_class_accuracy/{self.trainer.cfg.data.names[i]}", acc_class[i], current_epoch)
             
-        current_epoch = self.trainer.epoch + 1
+        
         if self.trainer.writer is not None:
             self.trainer.writer.add_scalar("val/loss", loss_avg, current_epoch)
             self.trainer.writer.add_scalar("val/mIoU", m_iou, current_epoch)

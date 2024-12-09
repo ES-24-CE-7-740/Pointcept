@@ -22,10 +22,9 @@ class TractorsAndCombinesCombinedDataset(DefaultDataset):
 
     def get_data_list(self):
         split2seq = dict(
-            #train=[2, 3, 4, 5, 6, 7, 8, 9, 10, 20, 21],
-            train=[10, 20, 21],
-            val=[40],
-            test=[30],
+            train=[0, 1, 10],
+            val=[3],
+            test=[2],
         )
         if isinstance(self.split, str):
             seq_list = split2seq[self.split]
@@ -51,24 +50,15 @@ class TractorsAndCombinesCombinedDataset(DefaultDataset):
         with open(data_path, "rb") as b:
             scan = np.load(b).astype(np.float32)
         coord = scan[:, :3]
-        
-        # if coord.shape[0] > 50000:
-        #     random_sampels = np.random.uniform(low=0.0, high=1.0, size=coord.shape[0])
-        #     threshold = 50000/coord.shape[0]
-        #     idx_samples = random_sampels < threshold
-        #     coord = coord[idx_samples]
-
         strength = scan[:, -1].reshape([-1, 1])
 
         label_file = data_path.replace("points", "labels")
         if os.path.exists(label_file):
             with open(label_file, "rb") as a:
                 segment = np.round(np.load(a)).astype(np.uint32).reshape(-1).astype(np.int32)
-                # if segment.shape[0] > 50000:
-                #     segment = segment[idx_samples]
-                                    # segment = np.vectorize(self.learning_map.__getitem__)(
-                #     segment & 0xFFFF
-                # ).astype(np.int32)
+                segment = np.vectorize(self.learning_map.__getitem__)(
+                    segment & 0xFFFF
+                ).astype(np.int32)
         else:
             raise Exception("no labels found") 
             segment = np.zeros(scan.shape[0]).astype(np.int32)
@@ -99,6 +89,7 @@ class TractorsAndCombinesCombinedDataset(DefaultDataset):
             0: 0,  # "unlabeled"
             1: 1, # "tractor"
             2: 2, # "combine"
+            3: 0,
         }
         return learning_map
 
@@ -109,5 +100,6 @@ class TractorsAndCombinesCombinedDataset(DefaultDataset):
             0: 0,  # "unlabeled"
             1: 1, # "tractor"
             2: 2, # "combine"
+            -1: 0,
         }
         return learning_map_inv
