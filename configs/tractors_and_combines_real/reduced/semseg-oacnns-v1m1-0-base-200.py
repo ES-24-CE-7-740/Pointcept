@@ -1,4 +1,4 @@
-_base_ = ["../_base_/default_runtime.py"]
+_base_ = ["../../_base_/default_runtime.py"]
 
 # misc custom setting
 batch_size = 12  # bs: total bs in all gpus
@@ -31,8 +31,8 @@ model = dict(
 
 
 # scheduler settings
-epoch = 100
-eval_epoch = 100
+epoch = 300
+eval_epoch = 300
 optimizer = dict(type="AdamW", lr=0.002, weight_decay=0.005)
 scheduler = dict(
     type="OneCycleLR",
@@ -45,7 +45,7 @@ scheduler = dict(
 
 # dataset settings
 dataset_type = "TractorsAndCombinesRealDataset"
-data_root = "data/tractors_and_combines_real/reduced/600"
+data_root = "data/tractors_and_combines_real/reduced/200"
 ignore_index = -1
 names = [
     "other",

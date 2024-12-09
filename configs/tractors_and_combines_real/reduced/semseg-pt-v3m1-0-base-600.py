@@ -1,4 +1,4 @@
-_base_ = ["../_base_/default_runtime.py"]
+_base_ = ["../../_base_/default_runtime.py"]
 
 # misc custom setting
 batch_size = 12  # bs: total bs in all gpus
@@ -8,11 +8,11 @@ empty_cache = True
 enable_amp = True
 sync_bn = True
 num_worker_per_gpu = 4
-EPOCHS = 75
+EPOCHS = 100
 
 # dataset settings
 dataset_type = "TractorsAndCombinesRealDataset"
-data_root = "data/tractors_and_combines_real/reduced_more/800"
+data_root = "data/tractors_and_combines_real/reduced_more/600"
 ignore_index = -1
 label_names = [
     "other",
