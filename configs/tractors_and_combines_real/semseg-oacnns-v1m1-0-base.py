@@ -8,6 +8,17 @@ enable_amp = True
 sync_bn = True
 num_worker_per_gpu=2
 num_worker = 12
+EPOCHS = 50
+
+# dataset settings
+dataset_type = "TractorsAndCombinesRealDataset"
+data_root = "data/tractors_and_combines_real/"
+ignore_index = -1
+names = [
+    "other",
+    "tractor",
+    "combine",
+ ]
 
 # model settings
 model = dict(
@@ -31,8 +42,8 @@ model = dict(
 
 
 # scheduler settings
-epoch = 10
-eval_epoch = 10
+epoch = EPOCHS
+eval_epoch = EPOCHS
 optimizer = dict(type="AdamW", lr=0.002, weight_decay=0.005)
 scheduler = dict(
     type="OneCycleLR",
@@ -43,15 +54,7 @@ scheduler = dict(
     final_div_factor=100.0,
 )
 
-# dataset settings
-dataset_type = "TractorsAndCombinesRealDataset"
-data_root = "/workspace/tractors_and_combines_real/"
-ignore_index = -1
-names = [
-    "other",
-    "tractor",
-    "combine",
- ]
+
 
 data = dict(
     num_classes=3,

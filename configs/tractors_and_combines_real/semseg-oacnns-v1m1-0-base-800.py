@@ -2,89 +2,61 @@ _base_ = ["../_base_/default_runtime.py"]
 
 # misc custom setting
 batch_size = 12  # bs: total bs in all gpus
-num_worker = 24
 mix_prob = 0.8
 empty_cache = True
 enable_amp = True
 sync_bn = True
-num_worker_per_gpu = 4
-EPOCHS = 50
-
-# dataset settings
-dataset_type = "TractorsAndCombinesRealDataset"
-data_root = "data/tractors_and_combines_real"
-ignore_index = -1
-label_names = [
-    "other",
-    "tractor",
-    "combine",
-]
+num_worker_per_gpu=2
+num_worker = 12
 
 # model settings
 model = dict(
-    type="DefaultSegmentorV2",
-    num_classes=len(label_names),
-    backbone_out_channels=64,
+    type="DefaultSegmentor",
     backbone=dict(
-        type="PT-v3m1",
-        in_channels=3, # <---- Num features in point cloud
-        order=["z", "z-trans", "hilbert", "hilbert-trans"],
-        stride=(2, 2, 2, 2),
-        enc_depths=(2, 2, 2, 6, 2),
-        enc_channels=(32, 64, 128, 256, 512),
-        enc_num_head=(2, 4, 8, 16, 32),
-        enc_patch_size=(1024, 1024, 1024, 1024, 1024),
-        dec_depths=(2, 2, 2, 2),
-        dec_channels=(64, 64, 128, 256),
-        dec_num_head=(4, 4, 8, 16),
-        dec_patch_size=(1024, 1024, 1024, 1024),
-        mlp_ratio=4,
-        qkv_bias=True,
-        qk_scale=None,
-        attn_drop=0.0,
-        proj_drop=0.0,
-        drop_path=0.3,
-        shuffle_orders=True,
-        pre_norm=True,
-        enable_rpe=False,
-        enable_flash=True,
-        upcast_attention=False,
-        upcast_softmax=False,
-        cls_mode=False,
-        pdnorm_bn=False,
-        pdnorm_ln=False,
-        pdnorm_decouple=True,
-        pdnorm_adaptive=False,
-        pdnorm_affine=True,
-        pdnorm_conditions=("ScanNet", "S3DIS", "Structured3D"),
+        type="OACNNs",
+        in_channels=3,
+        num_classes=3,
+        embed_channels=64,
+        enc_channels=[64, 64, 128, 256],
+        groups=[4, 4, 8, 16],
+        enc_depth=[3, 3, 9, 8],
+        dec_channels=[256, 256, 256, 256],
+        point_grid_size=[[8, 12, 16, 16], [6, 9, 12, 12], [4, 6, 8, 8], [3, 4, 6, 6]],
+        dec_depth=[2, 2, 2, 2],
+        enc_num_ref=[16, 16, 16, 16],
     ),
-    criteria=[
-        dict(type="CrossEntropyLoss", loss_weight=1.0, ignore_index=-1),
-        dict(type="LovaszLoss", mode="multiclass", loss_weight=1.0, ignore_index=-1),
-    ],
+    criteria=[dict(type="CrossEntropyLoss" ,loss_weight=1.0, ignore_index=-1)],
 )
+
+
 
 # scheduler settings
-epoch = EPOCHS
-eval_epoch = EPOCHS
-optimizer = dict(type="AdamW", lr=0.006, weight_decay=0.05)
+epoch = 75
+eval_epoch = 75
+optimizer = dict(type="AdamW", lr=0.002, weight_decay=0.005)
 scheduler = dict(
     type="OneCycleLR",
-    max_lr=[0.006, 0.0006],
-    pct_start=0.05,
+    max_lr=optimizer["lr"],
+    pct_start=0.04,
     anneal_strategy="cos",
     div_factor=10.0,
-    final_div_factor=1000.0,
+    final_div_factor=100.0,
 )
-param_dicts = [dict(keyword="block", lr=0.0006)]
 
-
-
+# dataset settings
+dataset_type = "TractorsAndCombinesRealDataset"
+data_root = "data/tractors_and_combines_real/reduced/800"
+ignore_index = -1
+names = [
+    "other",
+    "tractor",
+    "combine",
+ ]
 
 data = dict(
-    num_classes=len(label_names),
+    num_classes=3,
     ignore_index=ignore_index,
-    names=label_names,
+    names=names,
     train=dict(
         type=dataset_type,
         split="train",
@@ -105,7 +77,9 @@ data = dict(
                 grid_size=0.05,
                 hash_type="fnv",
                 mode="train",
-                keys=("coord", "segment"),
+                keys=("coord", 
+                      #"strength", 
+                      "segment"),
                 return_grid_coord=True,
             ),
             dict(type="PointClip", point_cloud_range=(-35.2, -35.2, -4, 35.2, 35.2, 2)),
@@ -116,7 +90,7 @@ data = dict(
             dict(
                 type="Collect",
                 keys=("coord", "grid_coord", "segment"),
-                feat_keys=("coord"),
+                feat_keys=("coord"),#, "strength"),
             ),
         ],
         test_mode=False,
@@ -132,7 +106,9 @@ data = dict(
                 grid_size=0.05,
                 hash_type="fnv",
                 mode="train",
-                keys=("coord", "segment"),
+                keys=("coord",
+                      #"strength", 
+                      "segment"),
                 return_grid_coord=True,
             ),
             dict(type="PointClip", point_cloud_range=(-35.2, -35.2, -4, 35.2, 35.2, 2)),
@@ -140,7 +116,7 @@ data = dict(
             dict(
                 type="Collect",
                 keys=("coord", "grid_coord", "segment"),
-                feat_keys=("coord"),
+                feat_keys=("coord"),#, "strength"),
             ),
         ],
         test_mode=False,
@@ -159,7 +135,7 @@ data = dict(
                 hash_type="fnv",
                 mode="test",
                 return_grid_coord=True,
-                keys=("coord"),
+                keys=("coord"),#, "strength"),
             ),
             crop=None,
             post_transform=[
@@ -171,7 +147,7 @@ data = dict(
                 dict(
                     type="Collect",
                     keys=("coord", "grid_coord", "index"),
-                    feat_keys=("coord"),
+                    feat_keys=("coord"),# "strength"),
                 ),
             ],
             aug_transform=[

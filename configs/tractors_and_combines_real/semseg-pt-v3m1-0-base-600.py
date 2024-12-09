@@ -8,11 +8,11 @@ empty_cache = True
 enable_amp = True
 sync_bn = True
 num_worker_per_gpu = 4
-EPOCHS = 50
+EPOCHS = 100
 
 # dataset settings
 dataset_type = "TractorsAndCombinesRealDataset"
-data_root = "data/tractors_and_combines_real"
+data_root = "data/tractors_and_combines_real/reduced_more/600"
 ignore_index = -1
 label_names = [
     "other",
