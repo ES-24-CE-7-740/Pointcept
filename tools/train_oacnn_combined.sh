@@ -14,17 +14,16 @@ run_training() {
     echo "Completed: $1 (logs saved to exp/oacnn_combined_logs/$3.log)"
 }
 
+run_training "Training using 200 real pcs for 10 epochs..." \
+    "CUDA_VISIBLE_DEVICES=0,1,2,3,4,5,6,7 sh scripts/train.sh -p python -g 6 -d tractors_and_combines_combined -c semseg-oacnns-v1m1-0-base-200 -n OACNN_200" \
+    "training_200"
 
-run_training "Training using 800 real pcs for 10 epochs..." \
-    "CUDA_VISIBLE_DEVICES=0,1,2,3,4,5,6,7 sh scripts/train.sh -p python -g 6 -d tractors_and_combines_combined -c semseg-oacnns-v1m1-0-base-800 -n OACNN_800" \
-    "training_800"
+run_training "Training using 400 real pcs for 10 epochs..." \
+    "CUDA_VISIBLE_DEVICES=0,1,2,3,4,5,6,7 sh scripts/train.sh -p python -g 6 -d tractors_and_combines_combined -c semseg-oacnns-v1m1-0-base-400 -n OACNN_400" \
+    "training_400"
 
-run_training "Training using 1000 real pcs for 10 epochs..." \
-    "CUDA_VISIBLE_DEVICES=0,1,2,3,4,5,6,7 sh scripts/train.sh -p python -g 6 -d tractors_and_combines_combined -c semseg-oacnns-v1m1-0-base-1000 -n OACNN_1000" \
-    "training_1000"
-
-run_training "Training using 1200 real pcs for 10 epochs..." \
-    "CUDA_VISIBLE_DEVICES=0,1,2,3,4,5,6,7 sh scripts/train.sh -p python -g 6 -d tractors_and_combines_combined -c semseg-oacnns-v1m1-0-base-1200 -n OACNN_1200" \
-    "training_1200"
+run_training "Training using 600 real pcs for 10 epochs..." \
+    "CUDA_VISIBLE_DEVICES=0,1,2,3,4,5,6,7 sh scripts/train.sh -p python -g 6 -d tractors_and_combines_combined -c semseg-oacnns-v1m1-0-base-600 -n OACNN_600" \
+    "training_600"
 
 echo 'Training completed!'
