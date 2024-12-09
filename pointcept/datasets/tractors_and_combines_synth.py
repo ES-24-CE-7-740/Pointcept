@@ -22,9 +22,9 @@ class TractorsAndCombinesSynthDataset(DefaultDataset):
 
     def get_data_list(self):
         split2seq = dict(
-            train=[2,3],
-            # val=[4],
-            test=[5],
+            train=[2, 3, 4, 5, 6, 7, 8, 9, 10],
+            val=[0],
+            test=[1],
         )
         if isinstance(self.split, str):
             seq_list = split2seq[self.split]

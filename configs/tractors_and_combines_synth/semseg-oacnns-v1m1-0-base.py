@@ -1,7 +1,7 @@
 _base_ = ["../_base_/default_runtime.py"]
 
 # misc custom setting
-batch_size = 6  # bs: total bs in all gpus
+batch_size = 12  # bs: total bs in all gpus
 mix_prob = 0.8
 empty_cache = True
 enable_amp = True
@@ -45,9 +45,7 @@ scheduler = dict(
 
 # dataset settings
 dataset_type = "TractorsAndCombinesSynthDataset"
-data_root = "/workspace/tractors_and_combines_synth/"
-data_root_val = "/workspace/tractors_and_combines_real/"
-data_type_val = "TractorsAndCombinesRealDataset"
+data_root = "data/tractors_and_combines_synth/"
 ignore_index = -1
 names = [
     "other",
@@ -99,9 +97,9 @@ data = dict(
         ignore_index=ignore_index,
     ),
     val=dict(
-        type=data_type_val,
+        type=dataset_type,
         split="test",
-        data_root=data_root_val,
+        data_root=data_root,
         transform=[
             dict(
                 type="GridSample",

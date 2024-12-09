@@ -8,10 +8,11 @@ empty_cache = True
 enable_amp = True
 sync_bn = True
 num_worker_per_gpu = 4
+EPOCHS = 5
 
 # dataset settings
 dataset_type = "TractorsAndCombinesSynthDataset"
-data_root = "data/tractors_and_combines_synth" # "/workspace/tractors_and_combines_synth/"
+data_root = "data/tractors_and_combines_synth"
 ignore_index = -1
 label_names = [
     "other",
@@ -64,8 +65,8 @@ model = dict(
 )
 
 # scheduler settings
-epoch = 10
-eval_epoch = 10
+epoch = EPOCHS
+eval_epoch = EPOCHS
 optimizer = dict(type="AdamW", lr=0.006, weight_decay=0.05)
 scheduler = dict(
     type="OneCycleLR",
@@ -147,7 +148,7 @@ data = dict(
     ),
     test=dict(
         type=dataset_type,
-        split="val",
+        split="test",
         data_root=data_root,
         transform=[],
         test_mode=True,
