@@ -1,5 +1,7 @@
 """
-tractors and combines real dataset
+
+tractors and combines synth dataset
+
 
 Author: Xiaoyang Wu (xiaoyang.wu.cs@gmail.com) (edited)
 Please cite our work if the code is helpful to you.
@@ -7,7 +9,9 @@ Please cite our work if the code is helpful to you.
 
 import os
 import numpy as np
+
 import json 
+
 from .builder import DATASETS
 from .defaults import DefaultDataset
 
@@ -33,9 +37,11 @@ class TTGCHSynthDataset(DefaultDataset):
 
     def get_data_list(self):
         split2seq = dict(
-            train=[0,1],
-            val=[3],
-            test=[2],
+
+            train=[1,2],
+            val=[0],
+            test=[3],
+
         )
         if isinstance(self.split, str):
             seq_list = split2seq[self.split]
@@ -47,10 +53,10 @@ class TTGCHSynthDataset(DefaultDataset):
             raise NotImplementedError
 
         data_list = []
-        all_seq_dirs = sorted([ f.path for f in os.scandir(os.path.join(self.data_root, "dataset", "sets")) if f.is_dir() ])
+
         for seq in seq_list:
-            # seq = str(seq).zfill(2)
-            seq = all_seq_dirs[seq]
+            seq = str(seq).zfill(2)
+
             seq_folder = os.path.join(self.data_root, "dataset", "sets", seq)
             seq_files = sorted(os.listdir(os.path.join(seq_folder, "points")))
             data_list += [
@@ -64,15 +70,17 @@ class TTGCHSynthDataset(DefaultDataset):
             scan = np.load(b).astype(np.float32)
         coord = scan[:, :3]
 
+
         label_file = data_path.replace("points", "labels")
         if os.path.exists(label_file):
             with open(label_file, "rb") as a:
-                segment = np.round(np.load(a)).astype(np.uint32)#.reshape(-1).astype(np.int32)
-                segment = np.vectorize(self.learning_map.__getitem__)(
-                    segment & 0xFFFF
-                ).astype(np.int32)
+
+                segment = np.round(np.load(a)).astype(np.uint32).reshape(-1).astype(np.int32)
+                segment = np.vectorize(self.learning_map.__getitem__)(segment & 0xFFFF).astype(np.int32)
         else:
             raise Exception("no labels found") 
+            segment = np.zeros(scan.shape[0]).astype(np.int32)
+
 
         data_dict = dict(
             coord=coord,
@@ -88,5 +96,4 @@ class TTGCHSynthDataset(DefaultDataset):
         frame_name = os.path.splitext(file_name)[0]
         data_name = f"{sequence_name}_{frame_name}"
         return data_name
-
 
