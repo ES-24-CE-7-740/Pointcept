@@ -1,7 +1,5 @@
 """
-
 tractors and combines synth dataset
-
 
 Author: Xiaoyang Wu (xiaoyang.wu.cs@gmail.com) (edited)
 Please cite our work if the code is helpful to you.
@@ -10,38 +8,23 @@ Please cite our work if the code is helpful to you.
 import os
 import numpy as np
 
-import json 
-
 from .builder import DATASETS
 from .defaults import DefaultDataset
 
 
 @DATASETS.register_module()
-class TTGCHSynthDataset(DefaultDataset):
+class TractorsAndCombinesCombinedDataset(DefaultDataset):
     def __init__(self, ignore_index=-1, **kwargs):
-        super().__init__(ignore_index=ignore_index, **kwargs)
-        with open(os.path.join(self.data_root, "model_label_config.json")) as f:
-            self.dataset_config = json.load(f)
-
         self.ignore_index = ignore_index
-        self.learning_map = {}
-        self.learning_map_inv = {}
-        for key in self.dataset_config["training_labels_map"].keys():
-            self.learning_map[int(key)] = self.dataset_config["training_labels_map"][key]
-
-        for key in self.dataset_config["inverted_training_label_map"].keys():
-            self.learning_map_inv[int(key)] = self.dataset_config["inverted_training_label_map"][key]
-
-        self.learning_map[ignore_index] = ignore_index
-        self.learning_map_inv[ignore_index] = ignore_index
+        self.learning_map = self.get_learning_map(ignore_index)
+        self.learning_map_inv = self.get_learning_map_inv(ignore_index)
+        super().__init__(ignore_index=ignore_index, **kwargs)
 
     def get_data_list(self):
         split2seq = dict(
-
-            train=[1,2],
-            val=[0],
-            test=[3],
-
+            train=[0, 1, 10],
+            val=[3],
+            test=[2],
         )
         if isinstance(self.split, str):
             seq_list = split2seq[self.split]
@@ -53,10 +36,8 @@ class TTGCHSynthDataset(DefaultDataset):
             raise NotImplementedError
 
         data_list = []
-
         for seq in seq_list:
             seq = str(seq).zfill(2)
-
             seq_folder = os.path.join(self.data_root, "dataset", "sets", seq)
             seq_files = sorted(os.listdir(os.path.join(seq_folder, "points")))
             data_list += [
@@ -69,21 +50,25 @@ class TTGCHSynthDataset(DefaultDataset):
         with open(data_path, "rb") as b:
             scan = np.load(b).astype(np.float32)
         coord = scan[:, :3]
-
+        strength = scan[:, -1].reshape([-1, 1])
 
         label_file = data_path.replace("points", "labels")
         if os.path.exists(label_file):
             with open(label_file, "rb") as a:
-
                 segment = np.round(np.load(a)).astype(np.uint32).reshape(-1).astype(np.int32)
-                segment = np.vectorize(self.learning_map.__getitem__)(segment & 0xFFFF).astype(np.int32)
+                segment = np.vectorize(self.learning_map.__getitem__)(
+                    segment & 0xFFFF
+                ).astype(np.int32)
         else:
             raise Exception("no labels found") 
             segment = np.zeros(scan.shape[0]).astype(np.int32)
-
+        
+        # if np.sum(segment) != 0:
+        #     raise Exception(f"2 in labels {label_file}, {np.sum(segment == 2)}")
 
         data_dict = dict(
             coord=coord,
+            # strength=strength,
             segment=segment,
             name=self.get_data_name(idx),
         )
@@ -97,3 +82,24 @@ class TTGCHSynthDataset(DefaultDataset):
         data_name = f"{sequence_name}_{frame_name}"
         return data_name
 
+    @staticmethod
+    def get_learning_map(ignore_index):
+        learning_map = {
+            ignore_index: ignore_index,
+            0: 0,  # "unlabeled"
+            1: 1, # "tractor"
+            2: 2, # "combine"
+            3: 0,
+        }
+        return learning_map
+
+    @staticmethod
+    def get_learning_map_inv(ignore_index):
+        learning_map_inv = {
+            ignore_index: ignore_index,
+            0: 0,  # "unlabeled"
+            1: 1, # "tractor"
+            2: 2, # "combine"
+            -1: 0,
+        }
+        return learning_map_inv

@@ -8,6 +8,7 @@ empty_cache = True
 enable_amp = True
 sync_bn = True
 num_worker_per_gpu = 4
+EPOCHS = 50
 
 # dataset settings
 dataset_type = "TractorsAndCombinesRealDataset"
@@ -64,8 +65,8 @@ model = dict(
 )
 
 # scheduler settings
-epoch = 50
-eval_epoch = 50
+epoch = EPOCHS
+eval_epoch = EPOCHS
 optimizer = dict(type="AdamW", lr=0.006, weight_decay=0.05)
 scheduler = dict(
     type="OneCycleLR",
@@ -147,7 +148,7 @@ data = dict(
     ),
     test=dict(
         type=dataset_type,
-        split="val",
+        split="test",
         data_root=data_root,
         transform=[],
         test_mode=True,

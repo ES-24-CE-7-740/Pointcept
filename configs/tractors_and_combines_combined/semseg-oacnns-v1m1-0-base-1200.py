@@ -6,13 +6,13 @@ mix_prob = 0.8
 empty_cache = True
 enable_amp = True
 sync_bn = True
-num_worker_per_gpu=2
-num_worker = 12
-EPOCHS = 50
+num_worker_per_gpu=4
+num_worker = 48
+EPOCHS = 10
 
 # dataset settings
-dataset_type = "TractorsAndCombinesRealDataset"
-data_root = "data/tractors_and_combines_real/"
+dataset_type = "TractorsAndCombinesCombinedDataset"
+data_root = "data/tractors_and_combines_combined/1200"
 ignore_index = -1
 names = [
     "other",
@@ -20,14 +20,13 @@ names = [
     "combine",
  ]
 
-
 # model settings
 model = dict(
     type="DefaultSegmentor",
     backbone=dict(
         type="OACNNs",
         in_channels=3,
-        num_classes=3,
+        num_classes=len(names),
         embed_channels=64,
         enc_channels=[64, 64, 128, 256],
         groups=[4, 4, 8, 16],
@@ -58,7 +57,7 @@ scheduler = dict(
 
 
 data = dict(
-    num_classes=3,
+    num_classes=len(names),
     ignore_index=ignore_index,
     names=names,
     train=dict(
@@ -66,6 +65,7 @@ data = dict(
         split="train",
         data_root=data_root,
         transform=[
+            dict(type="LimitMaxPoints", max_points=70000),
             # dict(type="RandomDropout", dropout_ratio=0.2, dropout_application_ratio=0.2),
             # dict(type="RandomRotateTargetAngle", angle=(1/2, 1, 3/2), center=[0, 0, 0], axis="z", p=0.75),
             dict(type="RandomRotate", angle=[-1, 1], axis="z", center=[0, 0, 0], p=0.5),
