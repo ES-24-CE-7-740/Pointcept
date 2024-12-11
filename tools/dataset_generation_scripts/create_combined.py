@@ -84,7 +84,7 @@ for idx in range(len(test_val_points)):
     test_val_labels[idx] = sorted(test_val_labels[idx])
 
 
-def symlinker(path_list: list[Path], new_seq_path: Path, prefix = None):
+def symlinker(path_list, new_seq_path, prefix = None):
     for path in path_list:
         
         # Define save path
