@@ -12,7 +12,8 @@ EPOCHS = 10
 
 # dataset settings
 dataset_type = "TractorsAndCombinesCombinedDataset"
-data_root = "data/tractors_and_combines_combined/1000"
+#data_root = "data/tractors_and_combines_combined/1000"
+data_root = "data/tractors_and_combines_combined_even_sampling/1000"
 ignore_index = -1
 names = [
     "other",
