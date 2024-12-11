@@ -22,9 +22,16 @@ class TractorsAndCombinesCombinedDataset(DefaultDataset):
 
     def get_data_list(self):
         split2seq = dict(
-            train=[0, 1, 10],
-            val=[3],
-            test=[2],
+            # Zeroshot training
+            train=[2,3,4,5,6,7,8,9,10],
+            val=[20],
+            test=[32],
+            
+            # Mixed training
+            #train=[0, 1, 10],
+            #train=[0, 1], # For real only
+            #val=[3],
+            #test=[2],
         )
         if isinstance(self.split, str):
             seq_list = split2seq[self.split]
