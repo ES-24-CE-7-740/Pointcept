@@ -1,10 +1,10 @@
 #!/bin/bash
-#SBATCH --job-name=ptv3_zeroshot_test
+#SBATCH --job-name=ptv3_combined_train
 #SBATCH --cpus-per-task=24
 #SBATCH --mem=60G
 #SBATCH --time=12:00:00
-#SBATCH --output=ptv3_zeroshot_test_%j.out
-#SBATCH --error=ptv3_zeroshot_test_%j.err
+#SBATCH --output=ptv3_combined_train_%j.out
+#SBATCH --error=ptv3_combined_train_%j.err
 
 # Set the number of tasks and GPUs directly
 #SBATCH --ntasks=1
