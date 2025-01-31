@@ -18,4 +18,4 @@ srun singularity exec --nv --bind /home:/home containers/ptv3-container.sif \
 	-g 2 \
 	-d ttgch_with_model_labels \
 	-c real/semseg-oacnns-v1m1-0-base-7label \
-	-n OACNN_real_7label
+	-n OACNN_real_7label_500epochs

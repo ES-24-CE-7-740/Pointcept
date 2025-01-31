@@ -1,10 +1,10 @@
 #!/bin/bash
-#SBATCH --job-name=oacnn_combined_train
+#SBATCH --job-name=downsampling
 #SBATCH --cpus-per-task=24
 #SBATCH --mem=60G
-#SBATCH --time=12:00:00
-#SBATCH --output=ptv3_combined_train_%j.out
-#SBATCH --error=ptv3_combined_train_%j.err
+#SBATCH --time=100:00:00
+#SBATCH --output=oacnn_downsampling_%j.out
+#SBATCH --error=oacnn_downsampling_%j.err
 
 # Set the number of tasks and GPUs directly
 #SBATCH --ntasks=1
@@ -14,4 +14,4 @@
 export CUDA_VISIBLE_DEVICES=0,1
 
 srun singularity exec --nv --bind /home:/home containers/ptv3-container.sif \
-	sh tools/train_scripts/train_oacnn_combined_even_sampling_extended.sh
+	sh tools/train_scripts/oacnn_downsampling.sh

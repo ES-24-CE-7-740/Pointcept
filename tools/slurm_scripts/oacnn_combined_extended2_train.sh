@@ -14,4 +14,4 @@
 export CUDA_VISIBLE_DEVICES=0,1
 
 srun singularity exec --nv --bind /home:/home containers/ptv3-container.sif \
-	sh tools/train_scripts/train_oacnn_combined_even_sampling_extended.sh
+	sh tools/train_scripts/train_oacnn_combined_even_sampling_extended2.sh
