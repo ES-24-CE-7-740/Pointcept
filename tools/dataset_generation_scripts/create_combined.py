@@ -15,9 +15,9 @@ root_synth = Path("data/tractors_and_combines_synth")
 synth_train_seqs = ['10']
 
 root_real = Path("data/tractors_and_combines_real")
-real_train_seqs = ['00', '01']
-real_val_seqs = ['03_val']
-real_test_seqs = ['02_test']
+real_train_seqs = ['001', '003', '005', '007']
+real_val_seqs = ['002']
+real_test_seqs = ['004']
 
 n_datapoints_list = [
     200,
