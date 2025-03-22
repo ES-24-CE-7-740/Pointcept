@@ -15,8 +15,8 @@ root_synth = Path("data/tractors_and_combines_synth")
 synth_train_seqs = ['02', '03', '04', '05', '06', '07', '08', '09', '10']
 synth_val_seqs = ['00'] # max 00->09
 
-root_real = Path("data/tractors_and_combines_real")
-real_test_seqs = ['02_test'] # max 00->09
+root_real = Path("data/dec_both_cfg_wml")
+real_test_seqs = ['005', '104', '001', '007', '103', '106',] # max 00->09
 
 #################################################
 
@@ -75,19 +75,19 @@ for idx in range(len(test_points)):
     test_labels[idx] = sorted(test_labels[idx])
 
 
-def symlinker(path_list, new_seq_path, prefix = None):
+def symlinker(path_list, new_seq_path, prefix = None, max_length = 3):
     for path in path_list:
         
         # Define save path
         save_path_parts = list(path.parts)
         
-        # If sequence name is longer than two characters, it is cropped
-        if len(save_path_parts[-3]) > 2:
-            new_seq_name = save_path_parts[-3][:2]
+        # If sequence name is longer than max_length characters, it is cropped
+        if len(save_path_parts[-3]) > max_length:
+            new_seq_name = save_path_parts[-3][:max_length]
             save_path_parts[-3] = new_seq_name
 
         if prefix is not None:
-            new_seq_name = str(prefix) + save_path_parts[-3][1:]
+            new_seq_name = str(prefix) + save_path_parts[-3][0:]
             save_path_parts[-3] = new_seq_name
 
         
@@ -96,7 +96,7 @@ def symlinker(path_list, new_seq_path, prefix = None):
         
         # Add prefix
         if prefix is not None:
-            new_filename = str(prefix) + file_path.name[1:]
+            new_filename = str(prefix) + file_path.name[0:]
             file_path = file_path.parent / new_filename
         
         # Define the new save path
@@ -112,12 +112,13 @@ def symlinker(path_list, new_seq_path, prefix = None):
 
 print(f"Processing zeroshot dataset...")
 
-save_root = save_dir / "tractors_and_combines_zeroshot" / "dataset" / "sets"
+#save_root = save_dir / "tractors_and_combines_zeroshot" / "dataset" / "sets"
+save_root = save_dir / "tractors_and_combines_ablation" / "dataset" / "sets"
 
 # Symlink the synthetic sequences
 for synth_seq in zip(synth_train_points, synth_train_labels):
-    symlinker(path_list=synth_seq[0], new_seq_path=save_root)
-    symlinker(path_list=synth_seq[1], new_seq_path=save_root)
+    symlinker(path_list=synth_seq[0], new_seq_path=save_root, prefix=1)
+    symlinker(path_list=synth_seq[1], new_seq_path=save_root, prefix=1)
 
 # Symlink validation sequences
 for val_seq in zip(val_points, val_labels):
