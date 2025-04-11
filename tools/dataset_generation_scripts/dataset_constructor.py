@@ -13,22 +13,36 @@ from tqdm import tqdm
 
 ### Config ######################################
 save_dir = Path("data").absolute()
-dataset_name = "tractors_and_combines_ablation"
+dataset_name = "agco_all_real_only"
 
-train_data = { # [003] -> [015]
-    Path("data/agco_all_synth"): ['003', '004', '005', '006', '007', '008', '009', '010', '011', '012', '013', '014', '015',],
+train_data = {
+    Path("data/october_wml"): ['001', '003',],
+    Path("data/dec_both_cfg_wml"): ['102','103', '104', '105', '106', '107', '109',],
 }
 
-validation_data = { # [001] [002]
-    Path("data/agco_all_synth"): ['001', '002'],
+validation_data = {
+    Path("data/dec_both_cfg_wml"): ['101', '108',],
 }
 
-# oct000, oct002, dec005, dec001
 # oct000, oct002, dec005, dec001, dec007
 test_data = { 
     Path("data/october_wml"): ['000', '002'],
     Path("data/dec_both_cfg_wml"): ['001', '005', '007',],
 }
+
+
+# Recipes:
+# real only dataset
+# - train = oct1 oct3 dec101-107 dec109
+# - val = dec100 dec108
+# - test = oct0 oct2 dec001 dec005 dec007
+
+
+# Notes:
+# Path("data/october_wml")
+# Path("data/dec_both_cfg_wml")
+# Path("data/agco_all_synth")
+
 
 #################################################
 
@@ -129,22 +143,49 @@ def symlinker(path_list, new_seq_path, prefix = None, length = 3): # length is w
 
 
 
-print(f"Processing dataset...")
+print(f"Processing '{dataset_name}' dataset...")
 
 #save_root = save_dir / "tractors_and_combines_zeroshot" / "dataset" / "sets"
 save_root = save_dir / f"{dataset_name}" / "dataset" / "sets"
 
+
 # Symlink the train sequences
-for synth_seq in tqdm(zip(train_points, train_labels), desc="Symlinking the train sequences...", total=len(train_points)):
-    symlinker(path_list=synth_seq[0], new_seq_path=save_root, prefix=1)
-    symlinker(path_list=synth_seq[1], new_seq_path=save_root, prefix=1)
+cnt = 0
+for train_seq in tqdm(zip(train_points, train_labels), desc="Symlinking the train sequences...", total=len(train_points)):
+    symlinker(path_list=train_seq[0], new_seq_path=save_root, prefix=1)
+    symlinker(path_list=train_seq[1], new_seq_path=save_root, prefix=1)
+    
+    # Some counting
+    cnt += len(train_seq[0])
+    with open(f"{save_root}/count_train.txt", "a") as file:
+        file.write(f"{len(train_seq[0])}\n")
+with open(f"{save_root}/count_train.txt", "a") as file:
+        file.write(f"TOTAL={cnt}\n")
+
 
 # Symlink validation sequences
+cnt = 0
 for val_seq in tqdm(zip(val_points, val_labels), desc="Symlinking the validation sequences...", total=len(val_points)):
     symlinker(path_list=val_seq[0], new_seq_path=save_root, prefix=2)
     symlinker(path_list=val_seq[1], new_seq_path=save_root, prefix=2)
+    
+    # Some counting
+    cnt += len(val_seq[0])
+    with open(f"{save_root}/count_val.txt", "a") as file:
+        file.write(f"{len(val_seq[0])}\n")
+with open(f"{save_root}/count_val.txt", "a") as file:
+        file.write(f"TOTAL={cnt}\n")
+
 
 # Symlink testing sequences
+cnt = 0
 for test_seq in tqdm(zip(test_points, test_labels), desc="Symlinking the test sequences...", total=len(test_points)):
     symlinker(path_list=test_seq[0], new_seq_path=save_root, prefix=3)
     symlinker(path_list=test_seq[1], new_seq_path=save_root, prefix=3)
+    
+    # Some counting
+    cnt += len(test_seq[0])
+    with open(f"{save_root}/count_test.txt", "a") as file:
+        file.write(f"{len(test_seq[0])}\n")
+with open(f"{save_root}/count_test.txt", "a") as file:
+        file.write(f"TOTAL={cnt}\n")

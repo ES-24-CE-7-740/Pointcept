@@ -15,10 +15,8 @@ from .semantic_kitti import SemanticKITTIDataset
 from .nuscenes import NuScenesDataset
 from .waymo import WaymoDataset
 from .tractors_and_combines_synth import TractorsAndCombinesSynthDataset
-from .tractors_and_combines_real import TractorsAndCombinesRealDataset
-from .tractors_and_combines_combined import TractorsAndCombinesCombinedDataset
 from .tractors_and_combines_dec import TractorsAndCombinesDecDataset
-from .tractors_and_combines_dec_ablation import TractorsAndCombinesDecAblationDataset
+
 from .ttgch_real_wml import TTGCHRealDataset
 from .ttgch_synth_wml import TTGCHSynthDataset
 # object
@@ -27,6 +25,17 @@ from .shapenet_part import ShapeNetPartDataset
 
 # dataloader
 from .dataloader import MultiDatasetDataloader
+
+# Real only dataset
+from .tractors_and_combines_real import TractorsAndCombinesRealDataset # Old
+from .tractors_and_combines_real_v2 import TractorsAndCombinesRealV2Dataset # Includes new data
+
+# Combined dataset
+from .tractors_and_combines_combined import TractorsAndCombinesCombinedDataset # Old
+from .tractors_and_combines_combined_v2 import TractorsAndCombinesCombinedV2Dataset # Includes new data
+
+# Ablation dataset
+from .tractors_and_combines_dec_ablation import TractorsAndCombinesDecAblationDataset
 
 # Tractor generalization
 from .tractor_generalization_bluevaltra import TractorGeneralizationBlueValtraDataset
