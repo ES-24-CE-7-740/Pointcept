@@ -191,11 +191,16 @@ class Trainer(TrainerBase):
         for key in input_dict.keys():
             if isinstance(input_dict[key], torch.Tensor):
                 input_dict[key] = input_dict[key].cuda(non_blocking=True)
+<<<<<<< HEAD
 
         with auto_cast(
             enabled=self.cfg.enable_amp, dtype=AMP_DTYPE[self.cfg.amp_dtype]
         ):
+=======
+        with torch.amp.autocast('cuda', enabled=self.cfg.enable_amp):
+>>>>>>> main
             output_dict = self.model(input_dict)
+            self.logger.info(f"output_dict {output_dict}")
             loss = output_dict["loss"]
         self.optimizer.zero_grad()
         if self.cfg.enable_amp:

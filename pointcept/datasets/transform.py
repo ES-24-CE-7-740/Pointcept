@@ -74,6 +74,9 @@ class Collect(object):
         for name, keys in self.kwargs.items():
             name = name.replace("_keys", "")
             assert isinstance(keys, Sequence)
+            if isinstance(keys, str):
+                keys = [keys]
+
             data[name] = torch.cat([data_dict[key].float() for key in keys], dim=1)
         return data
 
@@ -1180,6 +1183,25 @@ class InstanceParser(object):
         data_dict["bbox"] = bbox
         return data_dict
 
+@TRANSFORMS.register_module()
+class LimitMaxPoints(object):
+    def __init__(self, max_points):
+        self.max_points = max_points
+
+    def __call__(self, data_dict):
+        coord = data_dict["coord"]
+        segment = data_dict["segment"]
+        if coord.shape[0] > self.max_points:
+            random_sampels = np.random.uniform(low=0.0, high=1.0, size=coord.shape[0])
+            threshold = self.max_points/coord.shape[0]
+            idx_samples = random_sampels < threshold
+            coord = coord[idx_samples]
+            segment = segment[idx_samples]
+
+        data_dict["coord"] = coord
+        data_dict["segment"] = segment
+
+        return data_dict
 
 class Compose(object):
     def __init__(self, cfg=None):
