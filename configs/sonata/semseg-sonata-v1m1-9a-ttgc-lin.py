@@ -2,44 +2,27 @@ _base_ = ["../_base_/default_runtime.py"]
 
 # misc custom setting
 batch_size = 12  # bs: total bs in all gpus
-num_worker = 24
+num_worker = 4
 mix_prob = 0.8
-empty_cache = True
+clip_grad = 3.0
+empty_cache = False
 enable_amp = True
-sync_bn = True
-num_worker_per_gpu = 4
-EPOCHS = 50
-
-# dataset settings
-dataset_type = "TractorsAndCombinesRealV2Dataset"
-data_root = "/home/ai/datasets/point_clouds/agco_all_real_with_model_labes/october_wml/"
-ignore_index = -1
-label_names = [
-    "other",
-    "tractor",
-    "combine",
-    "trailer",
-    "katana",
-]
+EPOCHS = 20
 
 # model settings
 model = dict(
     type="DefaultSegmentorV2",
-    num_classes=len(label_names),
-    backbone_out_channels=64,
+    num_classes=20,
+    backbone_out_channels=1232,
     backbone=dict(
-        type="PT-v3m1",
-        in_channels=3, # <---- Num features in point cloud
-        order=["z", "z-trans", "hilbert", "hilbert-trans"],
+        type="PT-v3m2",
+        in_channels=9,
+        order=("z", "z-trans", "hilbert", "hilbert-trans"),
         stride=(2, 2, 2, 2),
-        enc_depths=(2, 2, 2, 6, 2),
-        enc_channels=(32, 64, 128, 256, 512),
-        enc_num_head=(2, 4, 8, 16, 32),
+        enc_depths=(3, 3, 3, 12, 3),
+        enc_channels=(48, 96, 192, 384, 512),
+        enc_num_head=(3, 6, 12, 24, 32),
         enc_patch_size=(1024, 1024, 1024, 1024, 1024),
-        dec_depths=(2, 2, 2, 2),
-        dec_channels=(64, 64, 128, 256),
-        dec_num_head=(4, 4, 8, 16),
-        dec_patch_size=(1024, 1024, 1024, 1024),
         mlp_ratio=4,
         qkv_bias=True,
         qk_scale=None,
@@ -52,36 +35,43 @@ model = dict(
         enable_flash=True,
         upcast_attention=False,
         upcast_softmax=False,
-        cls_mode=False,
-        pdnorm_bn=False,
-        pdnorm_ln=False,
-        pdnorm_decouple=True,
-        pdnorm_adaptive=False,
-        pdnorm_affine=True,
-        pdnorm_conditions=("ScanNet", "S3DIS", "Structured3D"),
+        traceable=False,
+        mask_token=False,
+        enc_mode=True,
+        freeze_encoder=False,
     ),
     criteria=[
         dict(type="CrossEntropyLoss", loss_weight=1.0, ignore_index=-1),
         dict(type="LovaszLoss", mode="multiclass", loss_weight=1.0, ignore_index=-1),
     ],
+    freeze_backbone=True,
 )
 
 # scheduler settings
 epoch = EPOCHS
-eval_epoch = EPOCHS
-optimizer = dict(type="AdamW", lr=0.006, weight_decay=0.05)
+eval_epoch = EPOCHS 
+optimizer = dict(type="AdamW", lr=0.002, weight_decay=0.02)
 scheduler = dict(
     type="OneCycleLR",
-    max_lr=[0.006, 0.0006],
+    max_lr=[0.002, 0.0002],
     pct_start=0.05,
     anneal_strategy="cos",
     div_factor=10.0,
     final_div_factor=1000.0,
 )
-param_dicts = [dict(keyword="block", lr=0.0006)]
+param_dicts = [dict(keyword="block", lr=0.0002)]
 
-
-
+# dataset settings
+dataset_type = "TractorsAndCombinesRealV2Dataset"
+data_root = "/home/ai/datasets/point_clouds/agco_all_real_with_model_labes/october_wml/"
+ignore_index = -1
+label_names = [
+    "other",
+    "tractor",
+    "combine",
+    "trailer",
+    "katana",
+]
 
 data = dict(
     num_classes=len(label_names),
@@ -119,7 +109,7 @@ data = dict(
             dict(
                 type="Collect",
                 keys=("coord", "grid_coord", "segment"),
-                feat_keys=("coord"),
+                feat_keys=("coord","color","normal"),
             ),
         ],
         test_mode=False,
@@ -143,7 +133,7 @@ data = dict(
             dict(
                 type="Collect",
                 keys=("coord", "grid_coord", "segment"),
-                feat_keys=("coord"),
+                feat_keys=("coord","color","normal"),
             ),
         ],
         test_mode=False,
@@ -219,3 +209,17 @@ data = dict(
         ignore_index=ignore_index,
     ),
 )
+
+# hook
+hooks = [
+    dict(
+        type="CheckpointLoader",
+        keywords="module.student.backbone",
+        replacement="module.backbone",
+    ),
+    dict(type="IterationTimer", warmup_iter=2),
+    dict(type="InformationWriter"),
+    dict(type="SemSegEvaluator"),
+    dict(type="CheckpointSaver", save_freq=None),
+    dict(type="PreciseEvaluator", test_last=False),
+]

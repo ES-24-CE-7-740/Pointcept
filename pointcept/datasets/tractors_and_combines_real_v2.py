@@ -22,9 +22,9 @@ class TractorsAndCombinesRealV2Dataset(DefaultDataset):
 
     def get_data_list(self):
         split2seq = dict(
-            train=['1001', '1003', '1102', '1103', '1104', '1105', '1106', '1107'],
-            val=['2101', '2108',],
-            test=['3000', '3001', '3002', '3005', '3007',],
+            train=[0,1],
+            val=[2],
+            test=[3],
         )
         if isinstance(self.split, str):
             seq_list = split2seq[self.split]
@@ -38,7 +38,7 @@ class TractorsAndCombinesRealV2Dataset(DefaultDataset):
         data_list = []
         for seq in seq_list:
             seq = str(seq).zfill(3)
-            seq_folder = os.path.join(self.data_root, "dataset", "sets", seq)
+            seq_folder = os.path.join(self.data_root, "dataset", "Sequences", seq)
             seq_files = sorted(os.listdir(os.path.join(seq_folder, "points")))
             data_list += [
                 os.path.join(seq_folder, "points", file) for file in seq_files
@@ -50,6 +50,8 @@ class TractorsAndCombinesRealV2Dataset(DefaultDataset):
         with open(data_path, "rb") as b:
             scan = np.load(b).astype(np.float32)
         coord = scan[:, :3]
+        color = np.zeros_like(scan)
+        normals = np.zeros_like(scan)
         strength = scan[:, -1].reshape([-1, 1])
 
         label_file = data_path.replace("points", "labels")
@@ -68,6 +70,8 @@ class TractorsAndCombinesRealV2Dataset(DefaultDataset):
 
         data_dict = dict(
             coord=coord,
+            color=color,
+            normal=normals,
             # strength=strength,
             segment=segment,
             name=self.get_data_name(idx),
@@ -86,7 +90,7 @@ class TractorsAndCombinesRealV2Dataset(DefaultDataset):
     def get_learning_map(ignore_index):
         learning_map = {
             ignore_index: ignore_index,
-            41:2,
+            41:4,
             20:2,
             21:2,
             22:2,
@@ -101,7 +105,7 @@ class TractorsAndCombinesRealV2Dataset(DefaultDataset):
             17:1,
             18:1,
             19:1,
-            30:0,
+            30:3,
             0:0,
             1:0,
         }
@@ -113,6 +117,8 @@ class TractorsAndCombinesRealV2Dataset(DefaultDataset):
             ignore_index: ignore_index,
             2:20,
             1:10,
+            3:30,
+            4:40,
             0:0,
         }
         return learning_map_inv
