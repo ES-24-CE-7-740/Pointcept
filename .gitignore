@@ -8,6 +8,7 @@ exp
 weights
 data
 log
+logs
 outputs/
 .vscode
 .idea

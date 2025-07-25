@@ -46,6 +46,7 @@ dependencies:
     - spconv-cu124
     - git+https://github.com/octree-nn/ocnn-pytorch.git
     - git+https://github.com/openai/CLIP.git
-    - git+https://github.com/Dao-AILab/flash-attention.git
+    #- git+https://github.com/Dao-AILab/flash-attention.git
+    - flash_attn==2.7.4.post1
     - ./libs/pointops
     - ./libs/pointgroup_ops

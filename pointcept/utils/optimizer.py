@@ -53,5 +53,5 @@ def build_optimizer(cfg, model, param_dicts=None):
             for key in cfg.params[i].keys():
                 if key != "params":
                     message += f" {key}: {cfg.params[i][key]};"
-            logger.info(f"Params Group {i+1} -{message} Params: {param_names}.")
+            #logger.info(f"Params Group {i+1} -{message} Params: {param_names}.") # <- This is useless spam
     return OPTIMIZERS.build(cfg=cfg)
