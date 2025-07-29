@@ -1,3 +1,5 @@
+**/*.err
+**/*.out
 image/
 __pycache__
 **/build/
@@ -5,6 +7,7 @@ __pycache__
 **/dist/
 *.so
 exp
+tests
 weights
 data
 log
@@ -15,3 +18,4 @@ outputs/
 */.DS_Store
 **/*.out
 Dockerfile
+**/*.sif

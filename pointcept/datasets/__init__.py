@@ -15,9 +15,16 @@ from .aeo import AEODataset
 from .semantic_kitti import SemanticKITTIDataset
 from .nuscenes import NuScenesDataset
 from .waymo import WaymoDataset
+from .tractors_and_combines_synth import TractorsAndCombinesSynthDataset
+from .tractors_and_combines_dec import TractorsAndCombinesDecDataset
+
 
 # AGCO datasets
 from .agco_all_real_wml import AgcoAllRealWML
+
+
+from .ttgch_real_wml import TTGCHRealDataset
+from .ttgch_synth_wml import TTGCHSynthDataset
 
 # object
 from .modelnet import ModelNetDataset
@@ -25,3 +32,22 @@ from .shapenet_part import ShapeNetPartDataset
 
 # dataloader
 from .dataloader import MultiDatasetDataloader
+
+# Real only dataset
+from .tractors_and_combines_real import TractorsAndCombinesRealDataset # Old
+from .tractors_and_combines_real_v2 import TractorsAndCombinesRealV2Dataset # Includes new data
+
+# Combined dataset
+from .tractors_and_combines_combined import TractorsAndCombinesCombinedDataset # Old
+from .tractors_and_combines_combined_v2 import TractorsAndCombinesCombinedV2Dataset # Includes new data
+
+# Ablation dataset
+from .tractors_and_combines_dec_ablation import TractorsAndCombinesDecAblationDataset
+
+# Tractor generalization
+from .tractor_generalization_bluevaltra import TractorGeneralizationBlueValtraDataset
+from .tractor_generalization_greyvaltra import TractorGeneralizationGreyValtraDataset
+from .tractor_generalization_fendt300 import TractorGeneralizationFendt300Dataset
+from .tractor_generalization_fendt1000 import TractorGeneralizationFendt1000Dataset
+from .tractor_generalization_orangevaltra import TractorGeneralizationOrangeValtraDataset
+from .tractor_generalization_forkvaltra import TractorGeneralizationForkValtraDataset

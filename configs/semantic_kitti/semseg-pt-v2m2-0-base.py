@@ -1,7 +1,7 @@
 _base_ = ["../_base_/default_runtime.py"]
 
 # misc custom setting
-batch_size = 8  # bs: total bs in all gpus
+batch_size = 2  # bs: total bs in all gpus
 mix_prob = 0.8
 empty_cache = False
 enable_amp = True
@@ -47,8 +47,8 @@ model = dict(
 )
 
 # scheduler settings
-epoch = 50
-eval_epoch = 50
+epoch = 1
+eval_epoch = 1
 optimizer = dict(type="AdamW", lr=0.002, weight_decay=0.005)
 scheduler = dict(
     type="OneCycleLR",
@@ -61,7 +61,7 @@ scheduler = dict(
 
 # dataset settings
 dataset_type = "SemanticKITTIDataset"
-data_root = "data/semantic_kitti"
+data_root = "/workspace/semantic_kitti"
 ignore_index = -1
 names = [
     "car",
