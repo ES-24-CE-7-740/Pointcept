@@ -11,6 +11,7 @@ tests
 weights
 data
 log
+logs
 outputs/
 .vscode
 .idea

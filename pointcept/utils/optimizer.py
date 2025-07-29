@@ -5,6 +5,7 @@ Author: Xiaoyang Wu (xiaoyang.wu.cs@gmail.com)
 Please cite our work if the code is helpful to you.
 """
 
+import copy
 import torch
 from pointcept.utils.logger import get_root_logger
 from pointcept.utils.registry import Registry
@@ -18,6 +19,7 @@ OPTIMIZERS.register_module(module=torch.optim.AdamW, name="AdamW")
 
 
 def build_optimizer(cfg, model, param_dicts=None):
+    cfg = copy.deepcopy(cfg)
     if param_dicts is None:
         cfg.params = model.parameters()
     else:
@@ -51,5 +53,7 @@ def build_optimizer(cfg, model, param_dicts=None):
             for key in cfg.params[i].keys():
                 if key != "params":
                     message += f" {key}: {cfg.params[i][key]};"
-            #logger.info(f"Params Group {i+1} -{message} Params: {param_names}.")
+
+            #logger.info(f"Params Group {i+1} -{message} Params: {param_names}.") # <- This is useless spam
+
     return OPTIMIZERS.build(cfg=cfg)
